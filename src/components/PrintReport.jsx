@@ -1,23 +1,38 @@
+import { useRef } from 'react'
+import html2pdf from 'html2pdf.js'
 import './PrintReport.css'
 
 export default function PrintReport({ title, sections, onClose }) {
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+  const docRef = useRef(null)
+
+  const handleDownload = () => {
+    html2pdf()
+      .set({
+        margin: 0,
+        filename: `${title.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      })
+      .from(docRef.current)
+      .save()
+  }
 
   return (
     <div className="pr-overlay">
-      {/* Toolbar — hidden when printing */}
-      <div className="pr-toolbar no-print">
+      <div className="pr-toolbar">
         <span className="pr-toolbar-label">{title}</span>
         <div className="pr-toolbar-actions">
-          <button className="pr-btn-print" onClick={() => window.print()}>
-            🖨️ Print / Save as PDF
+          <button className="pr-btn-print" onClick={handleDownload}>
+            ⬇️ Download as PDF
           </button>
           <button className="pr-btn-close" onClick={onClose}>✕ Close</button>
         </div>
       </div>
 
       {/* Printable document */}
-      <div className="pr-doc">
+      <div className="pr-doc" ref={docRef}>
         <div className="pr-doc-header">
           <div className="pr-doc-logo">MH</div>
           <div className="pr-doc-title-block">

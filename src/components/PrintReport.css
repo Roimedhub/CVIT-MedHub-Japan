@@ -257,27 +257,6 @@
   text-align: center;
 }
 
-/* ── Print media ── */
-@media print {
-  .no-print { display: none !important; }
-
-  .pr-overlay {
-    position: static;
-    background: #fff;
-    overflow: visible;
-  }
-
-  .pr-doc {
-    width: 100%;
-    margin: 0;
-    padding: 12mm 14mm;
-    box-shadow: none;
-    border-radius: 0;
-    min-height: auto;
-  }
-
-  .pr-section { break-inside: avoid; }
-}
 
 @media (max-width: 640px) {
   .pr-doc {
