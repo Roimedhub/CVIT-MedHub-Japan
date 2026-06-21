@@ -100,7 +100,7 @@ function PrintField({ field }) {
     return (
       <div className="pr-field pr-field-full">
         <div className="pr-label">{field.label}</div>
-        <div className="pr-textarea-val">{field.value || <span className="pr-empty">—</span>}</div>
+        <div className="pr-textarea-val">{field.value || ''}</div>
       </div>
     )
   }
@@ -109,7 +109,7 @@ function PrintField({ field }) {
   return (
     <div className={`pr-field${field.full ? ' pr-field-full' : ''}`}>
       <div className="pr-label">{field.label}</div>
-      <div className="pr-text-val">{field.value || <span className="pr-empty">—</span>}</div>
+      <div className="pr-text-val">{field.value || ''}</div>
     </div>
   )
 }
