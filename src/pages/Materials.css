@@ -1,0 +1,144 @@
+.mat-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header { margin-bottom: 0; }
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.3px;
+}
+
+.page-desc {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* ── Empty state banner ── */
+.mat-empty-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: var(--radius);
+  padding: 18px 22px;
+}
+
+.mat-empty-icon { font-size: 28px; flex-shrink: 0; }
+
+.mat-empty-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #7a5a00;
+  margin-bottom: 3px;
+}
+
+.mat-empty-sub {
+  font-size: 13px;
+  color: #9a7a20;
+}
+
+/* ── Grid ── */
+.mat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* ── Card ── */
+.mat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.mat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+.mat-card-icon { font-size: 18px; }
+
+.mat-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.mat-count {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ── Links list ── */
+.mat-links {
+  padding: 8px 0;
+}
+
+.mat-empty-cat {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.mat-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+  cursor: pointer;
+}
+
+.mat-link:last-child { border-bottom: none; }
+
+.mat-link:hover { background: var(--surface2); }
+
+.mat-link-icon {
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mat-link-body { flex: 1; min-width: 0; }
+
+.mat-link-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mat-link:hover .mat-link-label {
+  text-decoration: underline;
+}
+
+.mat-link-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 640px) {
+  .mat-grid { grid-template-columns: 1fr; }
+  .mat-empty-banner { flex-direction: column; gap: 10px; }
+}
