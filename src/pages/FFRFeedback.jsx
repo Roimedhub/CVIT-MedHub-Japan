@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './FormPage.css'
+import PrintReport from '../components/PrintReport'
 
 const initialState = {
   responderName: '',
@@ -43,6 +44,7 @@ function StarRating({ value, onChange }) {
 export default function FFRFeedback() {
   const [form, setForm] = useState(initialState)
   const [submitted, setSubmitted] = useState(false)
+  const [showPrint, setShowPrint] = useState(false)
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
   const setVal = (field) => (val) => setForm((f) => ({ ...f, [field]: val }))
@@ -57,6 +59,34 @@ export default function FFRFeedback() {
     setForm(initialState)
     setSubmitted(false)
   }
+
+  const printSections = [
+    {
+      title: '👤 Contact Person',
+      fields: [
+        { label: 'Name',     type: 'text',  value: form.responderName },
+        { label: 'Role',     type: 'select', value: form.responderRole, options: ['Interventional Cardiologist','Cardiologist','Cath Lab Nurse','Technician','Other'] },
+        { label: 'Email',    type: 'text',  value: form.responderEmail },
+        { label: 'Hospital / Institution', type: 'text', value: form.hospital },
+      ],
+    },
+    {
+      title: '⭐ Performance Ratings',
+      fields: [
+        { label: 'Overall Rating', type: 'stars', value: form.overallRating, full: true },
+      ],
+    },
+    {
+      title: '💬 Qualitative Feedback',
+      fields: [
+        { label: 'What worked well?',          type: 'textarea', value: form.positives },
+        { label: 'Areas for improvement',      type: 'textarea', value: form.improvements },
+        { label: 'Technical Issues Encountered', type: 'textarea', value: form.technicalIssues },
+      ],
+    },
+  ]
+
+  if (showPrint) return <PrintReport title="AutocathFFR Feedback" sections={printSections} onClose={() => setShowPrint(false)} />
 
   if (submitted) {
     return (
@@ -141,6 +171,7 @@ export default function FFRFeedback() {
 
         <div className="form-actions">
           <button type="button" className="btn btn-ghost" onClick={handleReset}>Clear Form</button>
+          <button type="button" className="btn btn-ghost" onClick={() => setShowPrint(true)}>📄 PDF Report</button>
           <button type="submit" className="btn btn-primary btn-ffr">Submit FFR Feedback →</button>
         </div>
       </form>

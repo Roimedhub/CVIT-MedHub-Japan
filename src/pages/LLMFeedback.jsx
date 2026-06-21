@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import './FormPage.css'
+import PrintReport from '../components/PrintReport'
 
 const initialState = {
   responderName: '',
   responderRole: '',
+  responderEmail: '',
   hospital: '',
   useCase: '',
   queryType: '',
@@ -44,6 +46,7 @@ function StarRating({ value, onChange }) {
 export default function LLMFeedback() {
   const [form, setForm] = useState(initialState)
   const [submitted, setSubmitted] = useState(false)
+  const [showPrint, setShowPrint] = useState(false)
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
   const setVal = (field) => (val) => setForm((f) => ({ ...f, [field]: val }))
@@ -58,6 +61,54 @@ export default function LLMFeedback() {
     setForm(initialState)
     setSubmitted(false)
   }
+
+  const printSections = [
+    {
+      title: '👤 Contact Person',
+      fields: [
+        { label: 'Name',     type: 'text',   value: form.responderName },
+        { label: 'Role',     type: 'select', value: form.responderRole, options: ['Interventional Cardiologist','Cardiologist','Cath Lab Nurse','Technician','Other'] },
+        { label: 'Email',    type: 'text',   value: form.responderEmail },
+        { label: 'Hospital / Institution', type: 'text', value: form.hospital },
+      ],
+    },
+    {
+      title: '🤖 Usage Context',
+      fields: [
+        { label: 'Primary Use Case',               type: 'select', value: form.useCase,            options: ['Report generation','Clinical decision support','Patient communication','Literature lookup','Protocol guidance','Training / Education','Other'] },
+        { label: 'Type of Queries Used',           type: 'select', value: form.queryType,          options: ['Diagnostic questions','Treatment recommendations','Drug / device information','Procedural guidance','Documentation / notes','Mixed'] },
+        { label: 'Would integrate into daily workflow?', type: 'select', full: true, value: form.integrateInWorkflow, options: ['Definitely yes','Probably yes','Not sure','Probably not','Definitely not'] },
+      ],
+    },
+    {
+      title: '⭐ Performance Ratings',
+      fields: [
+        { label: 'Response Quality',   type: 'stars', value: form.responseQuality },
+        { label: 'Clinical Relevance', type: 'stars', value: form.clinicalRelevance },
+        { label: 'Speed / Latency',    type: 'stars', value: form.speedRating },
+        { label: 'Ease of Use',        type: 'stars', value: form.easeOfUseRating },
+        { label: 'Overall Rating',     type: 'stars', value: form.overallRating },
+      ],
+    },
+    {
+      title: '🔬 AI Quality Assessment',
+      fields: [
+        { label: 'Hallucinations / Incorrect Information', type: 'select', full: true, value: form.hallucinations, options: ['No issues observed','Minor inaccuracies','Noticeable errors','Significant hallucinations'] },
+        { label: 'Hallucination Details', type: 'textarea', value: form.hallucinationDetails },
+        { label: 'Safety / Ethical Concerns', type: 'textarea', value: form.safetyConerns },
+      ],
+    },
+    {
+      title: '💬 Examples & Suggestions',
+      fields: [
+        { label: 'Most helpful response / use case',   type: 'textarea', value: form.helpfulExample },
+        { label: 'Least helpful response / use case',  type: 'textarea', value: form.unhelpfulExample },
+        { label: 'Additional Notes / Feature Requests', type: 'textarea', value: form.notes },
+      ],
+    },
+  ]
+
+  if (showPrint) return <PrintReport title="AutocathLLM Feedback" sections={printSections} onClose={() => setShowPrint(false)} />
 
   if (submitted) {
     return (
@@ -225,6 +276,7 @@ export default function LLMFeedback() {
 
         <div className="form-actions">
           <button type="button" className="btn btn-ghost" onClick={handleReset}>Clear Form</button>
+          <button type="button" className="btn btn-ghost" onClick={() => setShowPrint(true)}>📄 PDF Report</button>
           <button type="submit" className="btn btn-primary btn-llm">Submit LLM Feedback →</button>
         </div>
       </form>

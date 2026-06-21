@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './FormPage.css'
+import PrintReport from '../components/PrintReport'
 
 const initialState = {
   hospitalName: '',
@@ -21,6 +22,43 @@ const initialState = {
 export default function HospitalForm() {
   const [form, setForm] = useState(initialState)
   const [toast, setToast] = useState(false)
+  const [showPrint, setShowPrint] = useState(false)
+
+  const printSections = [
+    {
+      title: '🏥 Hospital Information',
+      fields: [
+        { label: 'Hospital Name',          type: 'text',   value: form.hospitalName },
+        { label: 'City',                   type: 'text',   value: form.city },
+        { label: 'Prefecture',             type: 'text',   value: form.prefecture },
+        { label: 'Total Cath Labs',        type: 'text',   value: form.cathLabCount },
+        { label: 'Annual PCI Volume',      type: 'text',   value: form.annualPCIVolume },
+      ],
+    },
+    {
+      title: '👤 Contact Person',
+      fields: [
+        { label: 'Full Name', type: 'text', value: form.contactName },
+        { label: 'Role', type: 'select', value: form.contactTitle, options: ['Interventional Cardiologist','Cardiologist','Cath Lab Nurse','Technician','Other'] },
+        { label: 'Email', type: 'text', value: form.contactEmail },
+        { label: 'Phone', type: 'text', value: form.contactPhone },
+      ],
+    },
+    {
+      title: '💡 Technology Interest',
+      fields: [
+        { label: 'Current FFR Usage', type: 'select', value: form.currentFFRUsage, options: ['None','Rarely (<10%)','Sometimes (10–30%)','Frequently (>30%)','Routinely (>50%)'] },
+        { label: 'FCA currently in use', type: 'select', value: form.currentLLMUsage, options: ['FFRAngio','QFR','Other'] },
+        { label: 'Interest Level in AutocathFFR / AutocathLLM', type: 'select', full: true, value: form.interestLevel, options: ['Low','Medium','High','Ready to pilot'] },
+      ],
+    },
+    {
+      title: '📝 Notes',
+      fields: [
+        { label: 'Additional Notes / Next Steps', type: 'textarea', value: form.notes },
+      ],
+    },
+  ]
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
 
@@ -36,6 +74,8 @@ export default function HospitalForm() {
     const t = setTimeout(() => setToast(false), 3000)
     return () => clearTimeout(t)
   }, [toast])
+
+  if (showPrint) return <PrintReport title="Potential Hospital" sections={printSections} onClose={() => setShowPrint(false)} />
 
   return (
     <div className="page">
@@ -155,6 +195,7 @@ export default function HospitalForm() {
 
         <div className="form-actions">
           <button type="button" className="btn btn-ghost" onClick={() => setForm(initialState)}>Clear Form</button>
+          <button type="button" className="btn btn-ghost" onClick={() => setShowPrint(true)}>📄 PDF Report</button>
           <button type="submit" className="btn btn-primary">Save</button>
         </div>
       </form>
