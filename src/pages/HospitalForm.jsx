@@ -4,7 +4,6 @@ import PrintReport from '../components/PrintReport'
 
 const initialState = {
   hospitalName: '',
-  city: '',
   contactName: '',
   contactTitle: '',
   contactEmail: '',
@@ -28,9 +27,8 @@ export default function HospitalForm() {
       title: '🏥 Hospital Information',
       fields: [
         { label: 'Hospital Name',          type: 'text',   value: form.hospitalName },
-        { label: 'City',                   type: 'text',   value: form.city },
         { label: 'Total Cath Labs',        type: 'text',   value: form.cathLabCount },
-        { label: 'Annual PCI Volume',      type: 'text',   value: form.annualPCIVolume },
+        { label: 'Annual CAG Volume',      type: 'text',   value: form.annualPCIVolume },
       ],
     },
     {
@@ -45,7 +43,6 @@ export default function HospitalForm() {
     {
       title: '💡 Technology Interest',
       fields: [
-        { label: 'Current FFR Usage', type: 'select', value: form.currentFFRUsage, options: ['None','Rarely (<10%)','Sometimes (10–30%)','Frequently (>30%)','Routinely (>50%)'] },
         { label: 'FCA currently in use', type: 'select', value: form.currentLLMUsage, options: ['FFRAngio','QFR','Other'] },
         { label: 'Interest Level in AutocathFFR / AutocathLLM', type: 'select', full: true, value: form.interestLevel, options: ['Low','Medium','High','Ready to pilot'] },
       ],
@@ -95,15 +92,11 @@ export default function HospitalForm() {
               <input required placeholder="e.g. Tokyo University Hospital" value={form.hospitalName} onChange={set('hospitalName')} />
             </div>
             <div className="field">
-              <label>City</label>
-              <input placeholder="e.g. Tokyo" value={form.city} onChange={set('city')} />
-            </div>
-            <div className="field">
               <label>Total Cath Labs</label>
               <input type="number" placeholder="e.g. 3" value={form.cathLabCount} onChange={set('cathLabCount')} />
             </div>
             <div className="field">
-              <label>Annual PCI Volume (approx.)</label>
+              <label>Annual CAG Volume (approx.)</label>
               <input type="number" placeholder="e.g. 500" value={form.annualPCIVolume} onChange={set('annualPCIVolume')} />
             </div>
           </div>
@@ -141,17 +134,6 @@ export default function HospitalForm() {
         <section className="form-section">
           <h3 className="section-title">💡 Technology Interest</h3>
           <div className="field-grid">
-            <div className="field">
-              <label>Current FFR Usage</label>
-              <select value={form.currentFFRUsage} onChange={set('currentFFRUsage')}>
-                <option value="">Select...</option>
-                <option>None</option>
-                <option>Rarely (&lt;10%)</option>
-                <option>Sometimes (10–30%)</option>
-                <option>Frequently (&gt;30%)</option>
-                <option>Routinely (&gt;50%)</option>
-              </select>
-            </div>
             <div className="field">
               <label>FCA currently in use</label>
               <select value={form.currentLLMUsage} onChange={set('currentLLMUsage')}>
