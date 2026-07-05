@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './FormPage.css'
 import PrintReport from '../components/PrintReport'
+import { supabase } from '../lib/supabase'
 
 const initialState = {
   responderName: '',
@@ -49,9 +50,23 @@ export default function FFRFeedback() {
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
   const setVal = (field) => (val) => setForm((f) => ({ ...f, [field]: val }))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('FFR Feedback submission:', form)
+    const { error } = await supabase.from('ffr_feedback').insert({
+      contact_name:     form.responderName,
+      contact_role:     form.responderRole,
+      contact_email:    form.responderEmail,
+      hospital:         form.hospital,
+      overall_rating:   form.overallRating ? Number(form.overallRating) : null,
+      positives:        form.positives,
+      improvements:     form.improvements,
+      technical_issues: form.technicalIssues,
+    })
+    if (error) {
+      console.error('Supabase insert error:', error)
+      alert('Failed to save. Please try again.')
+      return
+    }
     setSubmitted(true)
   }
 
