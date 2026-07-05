@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './FormPage.css'
 import PrintReport from '../components/PrintReport'
+import { supabase } from '../lib/supabase'
 
 const initialState = {
   hospitalName: '',
@@ -57,9 +58,25 @@ export default function HospitalForm() {
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Hospital form submission:', form)
+    const { error } = await supabase.from('potential_hospitals').insert({
+      hospital_name:    form.hospitalName,
+      contact_name:     form.contactName,
+      contact_role:     form.contactTitle,
+      contact_email:    form.contactEmail,
+      contact_phone:    form.contactPhone,
+      cath_lab_count:   form.cathLabCount   ? Number(form.cathLabCount)   : null,
+      annual_cag_volume: form.annualPCIVolume ? Number(form.annualPCIVolume) : null,
+      fca_in_use:       form.currentLLMUsage,
+      interest_level:   form.interestLevel,
+      notes:            form.notes,
+    })
+    if (error) {
+      console.error('Supabase insert error:', error)
+      alert('Failed to save. Please try again.')
+      return
+    }
     setForm(initialState)
     setToast(true)
   }
