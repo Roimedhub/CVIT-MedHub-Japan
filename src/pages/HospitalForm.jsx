@@ -5,7 +5,6 @@ import PrintReport from '../components/PrintReport'
 const initialState = {
   hospitalName: '',
   city: '',
-  prefecture: '',
   contactName: '',
   contactTitle: '',
   contactEmail: '',
@@ -30,7 +29,6 @@ export default function HospitalForm() {
       fields: [
         { label: 'Hospital Name',          type: 'text',   value: form.hospitalName },
         { label: 'City',                   type: 'text',   value: form.city },
-        { label: 'Prefecture',             type: 'text',   value: form.prefecture },
         { label: 'Total Cath Labs',        type: 'text',   value: form.cathLabCount },
         { label: 'Annual PCI Volume',      type: 'text',   value: form.annualPCIVolume },
       ],
@@ -99,10 +97,6 @@ export default function HospitalForm() {
             <div className="field">
               <label>City</label>
               <input placeholder="e.g. Tokyo" value={form.city} onChange={set('city')} />
-            </div>
-            <div className="field">
-              <label>Prefecture</label>
-              <input placeholder="e.g. Tokyo-to" value={form.prefecture} onChange={set('prefecture')} />
             </div>
             <div className="field">
               <label>Total Cath Labs</label>
