@@ -10,6 +10,7 @@ const initialState = {
   usefulTool: '',
   procedureStage: '',
   howUsed: [],
+  ideaForUse: '',
 }
 
 export default function LLMFeedback() {
@@ -43,7 +44,6 @@ export default function LLMFeedback() {
     'Assistance in decision making',
     'Plan after procedure',
     'Help in creating report for procedure',
-    'Financial — understand which devices are under reimbursement for the current procedure',
   ]
 
   const printSections = [
@@ -154,6 +154,10 @@ export default function LLMFeedback() {
                   </label>
                 ))}
               </div>
+            </div>
+            <div className="field full">
+              <label>Do you have an idea for using this technology?</label>
+              <textarea rows={3} placeholder="Share your idea..." value={form.ideaForUse} onChange={set('ideaForUse')} />
             </div>
           </div>
         </section>
