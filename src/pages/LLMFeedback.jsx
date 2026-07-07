@@ -62,6 +62,7 @@ export default function LLMFeedback() {
         { label: 'Would you see AutocathLLM as a useful tool for you?', type: 'select', full: true, value: form.usefulTool, options: ['Definitely yes','Probably yes','Not sure','Probably not','Definitely not'] },
         { label: 'At what stage would you use this tool?', type: 'select', full: true, value: form.procedureStage, options: ['Before the procedure to plan','After the procedure','Both'] },
         { label: 'How would you use this tool?', type: 'select', full: true, value: form.howUsed.join(', '), options: HOW_USED_OPTIONS },
+        { label: 'Do you have an idea for using this technology?', type: 'textarea', value: form.ideaForUse },
       ],
     },
   ]
