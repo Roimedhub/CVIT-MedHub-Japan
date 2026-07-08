@@ -42,7 +42,12 @@ const categories = [
     title: 'AutocathLLM',
     icon: '🤖',
     color: '#7c3aed',
-    links: [],
+    links: [
+      {
+        label: 'AutocathLLM Folder',
+        url: 'https://medhub-my.sharepoint.com/shared?id=%2Fpersonal%2Fyarden%5Fmedhub%2Dai%5Fcom%2FDocuments%2FMedhub%20Japan%20Marketing%20Materials%2FAutocathLLM&listurl=%2Fpersonal%2Fyarden%5Fmedhub%2Dai%5Fcom%2FDocuments&viewid=f3d15183%2D664f%2D4dbb%2D80c7%2D507b913a430a&sharingv2=true&fromShare=true&at=9&clickparams=eyAiWC1BcHBOYW1lIiA6ICJNaWNyb3NvZnQgT3V0bG9vayIsICJYLUFwcFZlcnNpb24iIDogIjE2LjAuMTk5MjkuMjAxNzIiLCAiT1MiIDogIldpbmRvd3MiIH0%3D&cidOR=SPO&FolderCTID=0x012000959ED9974976BB45A617D1736A22B69C',
+      },
+    ],
   },
   {
     id: 'finance',
