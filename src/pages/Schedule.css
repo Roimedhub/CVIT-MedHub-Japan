@@ -420,5 +420,7 @@
 .modal-btn.save         { color: #fff; min-width: 90px; }
 .modal-btn.save:disabled { background: var(--border) !important; color: var(--text-muted); cursor: not-allowed; }
 .modal-btn.save:not(:disabled):hover { opacity: 0.85; }
-.modal-btn.delete       { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
-.modal-btn.delete:hover { background: #fecaca; }
+.modal-btn.delete         { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+.modal-btn.delete:hover   { background: #fecaca; }
+.modal-btn.parallel       { background: #f0f4ff; color: #3730a3; border: 1px solid #c7d2fe; }
+.modal-btn.parallel:hover { background: #e0e7ff; }

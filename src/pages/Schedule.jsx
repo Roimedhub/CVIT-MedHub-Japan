@@ -152,6 +152,12 @@ export default function Schedule() {
     setModal(null)
   }
 
+  const openParallelTask = () => {
+    setEditMembers([])
+    setEditTask('Booth')
+    setModal((m) => ({ ...m, editId: undefined }))
+  }
+
   const toggleMember = (id) => {
     setEditMembers((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -306,6 +312,7 @@ export default function Schedule() {
           setEditTask={setEditTask}
           onSave={saveAssignment}
           onDelete={modal.editId ? deleteAssignment : null}
+          onParallel={modal.editId ? openParallelTask : null}
           onClose={() => setModal(null)}
           team={TEAM}
           quickTasks={QUICK_TASKS}
@@ -316,7 +323,7 @@ export default function Schedule() {
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, onSave, onDelete, onClose, team, quickTasks }) {
+function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, onSave, onDelete, onParallel, onClose, team, quickTasks }) {
   const ref = useRef(null)
   const dayLabel  = DAYS.find((d) => d.id === modal.dayId)?.label
   const startLabel = SLOTS[modal.startIdx]
@@ -412,6 +419,7 @@ function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, 
 
         <div className="modal-actions">
           {onDelete && <button className="modal-btn delete" onClick={onDelete}>Remove</button>}
+          {onDelete && <button className="modal-btn parallel" onClick={onParallel}>+ Parallel task</button>}
           <button
             className="modal-btn save"
             onClick={onSave}
