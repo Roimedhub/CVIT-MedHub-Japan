@@ -18,7 +18,7 @@ const TEAM = [
   { id: 'roi',     name: 'Roi',     color: '#0e7490' },
 ]
 
-const QUICK_TASKS = ['Booth', 'Meeting', 'Team Meeting', 'Demo', 'Lunch', 'Break', 'Session', 'Roll-up']
+const QUICK_TASKS = ['Booth', 'Meeting', 'Team Meeting', 'Hands-on', 'Lunch', 'Break', 'Reception+Game', 'Roll-up']
 
 const SLOT_H = 36
 
