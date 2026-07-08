@@ -239,11 +239,11 @@ export default function Schedule() {
                       style={{
                         top: a.startIdx * SLOT_H,
                         height: spanCount * SLOT_H - 2,
-                        background: primary ? primary.color + '18' : '#f0f4f9',
-                        borderLeft: `4px solid ${primary ? primary.color : '#8a9ab5'}`,
-                        borderTop: `1px solid ${primary ? primary.color + '40' : '#dde3ed'}`,
-                        borderBottom: `1px solid ${primary ? primary.color + '40' : '#dde3ed'}`,
-                        borderRight: `1px solid ${primary ? primary.color + '20' : '#dde3ed'}`,
+                        background: '#0a875418',
+                        borderLeft: '4px solid #0a8754',
+                        borderTop: '1px solid #0a875440',
+                        borderBottom: '1px solid #0a875440',
+                        borderRight: '1px solid #0a875420',
                       }}
                       onClick={(e) => {
                         e.stopPropagation()
