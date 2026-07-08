@@ -159,7 +159,6 @@
 }
 
 .slot-cell.half      { border-bottom: 1px dashed #e8edf5; }
-.slot-cell.covered   { cursor: default; pointer-events: none; }
 
 .slot-cell:not(.covered):hover { background: #e8f0ff; }
 .slot-cell.in-drag             { background: #bdd1ff !important; }
@@ -179,8 +178,6 @@
 /* ── Assignment blocks ── */
 .assignment-block {
   position: absolute;
-  left: 0;
-  right: 0;
   border-radius: 0 5px 5px 0;
   cursor: pointer;
   z-index: 2;

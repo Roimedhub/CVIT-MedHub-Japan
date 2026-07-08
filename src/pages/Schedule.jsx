@@ -44,6 +44,32 @@ function load() {
   catch { return [] }
 }
 
+// Assigns column index and total overlapping columns to each assignment
+function layoutDayAssignments(dayAssignments) {
+  if (!dayAssignments.length) return new Map()
+  const sorted = [...dayAssignments].sort((a, b) => a.startIdx - b.startIdx)
+  const colEnds = []
+  const colAssign = new Map()
+  for (const a of sorted) {
+    let col = colEnds.findIndex((end) => end < a.startIdx)
+    if (col === -1) col = colEnds.length
+    colEnds[col] = a.endIdx
+    colAssign.set(a.id, col)
+  }
+  const result = new Map()
+  for (const a of dayAssignments) {
+    const myCol = colAssign.get(a.id)
+    const activeCols = new Set([myCol])
+    for (const b of dayAssignments) {
+      if (b.id !== a.id && b.startIdx <= a.endIdx && b.endIdx >= a.startIdx) {
+        activeCols.add(colAssign.get(b.id))
+      }
+    }
+    result.set(a.id, { colIndex: myCol, totalCols: activeCols.size })
+  }
+  return result
+}
+
 function durationLabel(spanCount) {
   if (spanCount === 1) return '30 min'
   return spanCount % 2 === 0 ? `${spanCount / 2}h` : `${Math.floor(spanCount / 2)}h 30m`
@@ -201,11 +227,7 @@ export default function Schedule() {
               const ids = a.memberIds || (a.memberId ? [a.memberId] : [])
               return ids.includes(filterMember)
             })
-            const coveredSet = new Set(
-              dayAssignments.flatMap((a) =>
-                Array.from({ length: a.endIdx - a.startIdx + 1 }, (_, i) => a.startIdx + i)
-              )
-            )
+            const layout = layoutDayAssignments(dayAssignments)
             return (
               <div
                 key={day.id}
@@ -214,15 +236,14 @@ export default function Schedule() {
               >
                 {SLOTS.map((slot, idx) => {
                   const inDrag = drag?.dayId === day.id && idx >= dragLo && idx <= dragHi
-                  const covered = coveredSet.has(idx)
                   return (
                     <div
                       key={slot}
-                      className={`slot-cell${idx % 2 === 1 ? ' half' : ''}${inDrag ? ' in-drag' : ''}${covered ? ' covered' : ''}`}
-                      onMouseDown={(e) => !covered && onCellDown(day.id, idx, e)}
+                      className={`slot-cell${idx % 2 === 1 ? ' half' : ''}${inDrag ? ' in-drag' : ''}`}
+                      onMouseDown={(e) => onCellDown(day.id, idx, e)}
                       onMouseEnter={() => onCellEnter(day.id, idx)}
                     >
-                      {!covered && !inDrag && <span className="cell-plus">+</span>}
+                      {!inDrag && <span className="cell-plus">+</span>}
                     </div>
                   )
                 })}
@@ -231,14 +252,18 @@ export default function Schedule() {
                   const memberIds = a.memberIds || (a.memberId ? [a.memberId] : [])
                   const members   = memberIds.map((id) => MEMBER_MAP[id]).filter(Boolean)
                   const spanCount = a.endIdx - a.startIdx + 1
-                  const primary   = members[0]
+                  const { colIndex, totalCols } = layout.get(a.id) || { colIndex: 0, totalCols: 1 }
+                  const widthPct = 100 / totalCols
+                  const leftPct  = colIndex * widthPct
                   return (
                     <div
                       key={a.id}
                       className="assignment-block"
                       style={{
-                        top: a.startIdx * SLOT_H,
-                        height: spanCount * SLOT_H - 2,
+                        top: `${a.startIdx * SLOT_H}px`,
+                        height: `${spanCount * SLOT_H - 2}px`,
+                        left: `${leftPct}%`,
+                        width: `${widthPct}%`,
                         background: '#0a875418',
                         borderLeft: '4px solid #0a8754',
                         borderTop: '1px solid #0a875440',
