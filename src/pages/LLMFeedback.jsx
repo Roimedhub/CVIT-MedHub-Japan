@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './FormPage.css'
 import PrintReport from '../components/PrintReport'
+import { supabase } from '../lib/supabase'
 
 const initialState = {
   responderName: '',
@@ -29,9 +30,23 @@ export default function LLMFeedback() {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('LLM Feedback submission:', form)
+    const { error } = await supabase.from('llm_feedback').insert({
+      contact_name:    form.responderName,
+      contact_role:    form.responderRole,
+      contact_email:   form.responderEmail,
+      hospital:        form.hospital,
+      useful_tool:     form.usefulTool,
+      procedure_stage: form.procedureStage,
+      how_used:        form.howUsed.join(', '),
+      idea_for_use:    form.ideaForUse,
+    })
+    if (error) {
+      console.error('Supabase insert error:', error)
+      alert('Failed to save. Please try again.')
+      return
+    }
     setSubmitted(true)
   }
 
