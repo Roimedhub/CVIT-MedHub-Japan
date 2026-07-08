@@ -251,7 +251,7 @@ export default function Schedule() {
                         openEdit(a, rect.top + a.startIdx * SLOT_H + window.scrollY)
                       }}
                     >
-                      <div className="block-inner">
+                      <div className={`block-inner${spanCount === 1 ? ' compact' : ''}`}>
                         <div className="block-task">{a.task}</div>
                         <div className="block-members">
                           {members.map((m) => (

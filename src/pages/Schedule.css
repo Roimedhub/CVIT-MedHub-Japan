@@ -217,13 +217,16 @@
 }
 
 .block-task {
-  font-size: 11.5px;
-  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
 }
+
+.block-inner.compact .block-members { display: none; }
 
 .block-duration {
   font-size: 10.5px;
