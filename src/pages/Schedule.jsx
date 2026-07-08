@@ -60,8 +60,9 @@ export default function Schedule() {
   const [assignments, setAssignments] = useState(load)
   const [drag, setDrag]             = useState(null)
   const [modal, setModal]           = useState(null)
-  const [editMembers, setEditMembers] = useState([])   // array of member ids
+  const [editMembers, setEditMembers] = useState([])
   const [editTask, setEditTask]     = useState('Booth')
+  const [filterMember, setFilterMember] = useState(null)
 
   const dragRef = useRef(null)
   useEffect(() => { dragRef.current = drag }, [drag])
@@ -142,12 +143,27 @@ export default function Schedule() {
       </div>
 
       <div className="team-legend">
-        {TEAM.map((m) => (
-          <div key={m.id} className="team-chip" style={{ background: m.color + '18', borderColor: m.color + '55' }}>
-            <span className="team-dot" style={{ background: m.color }} />
-            {m.name}
+        {TEAM.map((m) => {
+          const active = filterMember === m.id
+          return (
+            <div
+              key={m.id}
+              className={`team-chip${active ? ' team-chip-active' : ''}`}
+              style={active
+                ? { background: m.color, borderColor: m.color, color: '#fff', cursor: 'pointer' }
+                : { background: m.color + '18', borderColor: m.color + '55', cursor: 'pointer' }}
+              onClick={() => setFilterMember(active ? null : m.id)}
+            >
+              <span className="team-dot" style={{ background: active ? '#fff' : m.color }} />
+              {m.name}
+            </div>
+          )
+        })}
+        {filterMember && (
+          <div className="team-chip filter-clear" onClick={() => setFilterMember(null)}>
+            ✕ Clear filter
           </div>
-        ))}
+        )}
       </div>
 
       {/* Single unified grid — header row + body rows share the same column tracks */}
@@ -179,7 +195,12 @@ export default function Schedule() {
 
           {/* ── Day columns ── */}
           {DAYS.map((day) => {
-            const dayAssignments = assignments.filter((a) => a.dayId === day.id)
+            const dayAssignments = assignments.filter((a) => {
+              if (a.dayId !== day.id) return false
+              if (!filterMember) return true
+              const ids = a.memberIds || (a.memberId ? [a.memberId] : [])
+              return ids.includes(filterMember)
+            })
             const coveredSet = new Set(
               dayAssignments.flatMap((a) =>
                 Array.from({ length: a.endIdx - a.startIdx + 1 }, (_, i) => a.startIdx + i)
@@ -231,6 +252,7 @@ export default function Schedule() {
                       }}
                     >
                       <div className="block-inner">
+                        <div className="block-task">{a.task}</div>
                         <div className="block-members">
                           {members.map((m) => (
                             <span key={m.id} className="block-member-chip" style={{ color: m.color, background: m.color + '18', borderColor: m.color + '44' }}>
@@ -238,7 +260,6 @@ export default function Schedule() {
                             </span>
                           ))}
                         </div>
-                        <div className="block-task">{a.task}</div>
                         {spanCount >= 3 && <div className="block-duration">{durationLabel(spanCount)}</div>}
                       </div>
                     </div>

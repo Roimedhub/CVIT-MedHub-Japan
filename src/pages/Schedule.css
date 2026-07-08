@@ -36,6 +36,18 @@
   border: 1px solid;
   font-size: 13px;
   font-weight: 600;
+  transition: all 0.15s;
+}
+
+.team-chip-active {
+  color: #fff;
+}
+
+.filter-clear {
+  background: #f0f4f9 !important;
+  border-color: #c8d0e0 !important;
+  color: #5a6a8a !important;
+  font-weight: 500;
 }
 
 .team-dot {
