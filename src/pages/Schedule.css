@@ -50,6 +50,26 @@
   font-weight: 500;
 }
 
+.legend-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.task-filter-chip {
+  background: #f5f3ff;
+  border-color: #a78bfa;
+  color: #6d28d9;
+}
+
+.task-filter-active {
+  background: #7c3aed !important;
+  border-color: #7c3aed !important;
+  color: #fff !important;
+}
+
 .team-dot {
   width: 8px;
   height: 8px;

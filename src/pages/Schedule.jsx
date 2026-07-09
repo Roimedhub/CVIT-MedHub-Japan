@@ -87,6 +87,9 @@ export default function Schedule() {
   const [editMembers, setEditMembers] = useState([])
   const [editTask, setEditTask]       = useState('Booth')
   const [filterMember, setFilterMember] = useState(null)
+  const [filterTask, setFilterTask]     = useState(null)
+
+  const TASK_FILTERS = ['Reception + Hands-on', 'Reception+Game']
   const [moving, setMoving]           = useState(null) // block drag-to-move state
 
   const dragRef   = useRef(null)
@@ -279,6 +282,26 @@ export default function Schedule() {
             ✕ Clear filter
           </div>
         )}
+
+        <div className="legend-divider" />
+
+        {TASK_FILTERS.map((task) => {
+          const active = filterTask === task
+          return (
+            <div
+              key={task}
+              className={`team-chip task-filter-chip${active ? ' task-filter-active' : ''}`}
+              onClick={() => setFilterTask(active ? null : task)}
+            >
+              {task}
+            </div>
+          )
+        })}
+        {filterTask && (
+          <div className="team-chip filter-clear" onClick={() => setFilterTask(null)}>
+            ✕ Clear filter
+          </div>
+        )}
       </div>
 
       <div className="sched-wrapper">
@@ -311,9 +334,12 @@ export default function Schedule() {
           {DAYS.map((day) => {
             const dayAssignments = assignments.filter((a) => {
               if (a.dayId !== day.id) return false
-              if (!filterMember) return true
-              const ids = a.memberIds || (a.memberId ? [a.memberId] : [])
-              return ids.includes(filterMember)
+              if (filterMember) {
+                const ids = a.memberIds || (a.memberId ? [a.memberId] : [])
+                if (!ids.includes(filterMember)) return false
+              }
+              if (filterTask && a.task !== filterTask) return false
+              return true
             })
             const layout = layoutDayAssignments(dayAssignments)
             const showPreview = moving?.moved && moving.targetDayId === day.id
