@@ -258,6 +258,14 @@
 
 .block-inner.compact .block-members { display: none; }
 
+.block-time-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #0a875499;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+
 .block-rollup-meta {
   display: flex;
   flex-direction: column;

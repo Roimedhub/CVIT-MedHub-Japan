@@ -220,6 +220,8 @@ export default function Schedule() {
           dayId: m.assignment.dayId,
           startIdx: m.assignment.startIdx,
           endIdx: m.assignment.endIdx,
+          startTime: m.assignment.startTime || null,
+          endTime: m.assignment.endTime || null,
           editId: m.assignment.id,
           anchorY: rect.top + m.assignment.startIdx * SLOT_H + window.scrollY,
         })
@@ -249,7 +251,7 @@ export default function Schedule() {
     setEditTask(a.task)
     setEditSession(a.session || '')
     setEditLocation(a.location || '')
-    setModal({ dayId: a.dayId, startIdx: a.startIdx, endIdx: a.endIdx, editId: a.id, anchorY })
+    setModal({ dayId: a.dayId, startIdx: a.startIdx, endIdx: a.endIdx, startTime: a.startTime || null, endTime: a.endTime || null, editId: a.id, anchorY })
   }
 
   // ── save / delete ──
@@ -457,6 +459,9 @@ export default function Schedule() {
                     >
                       <div className={`block-inner${spanCount === 1 ? ' compact' : ''}`}>
                         <div className="block-task">{a.task}</div>
+                        <div className="block-time-label">
+                          {(a.startTime || SLOTS[a.startIdx])} – {(a.endTime || endTimeLabel(a.endIdx))}
+                        </div>
                         {a.task === 'Roll-up' && (a.session || a.location) && (
                           <div className="block-rollup-meta">
                             {a.session && <span className="block-rollup-line">{a.session}</span>}
@@ -516,8 +521,8 @@ export default function Schedule() {
 function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, editSession, setEditSession, editLocation, setEditLocation, onSave, onDelete, onParallel, onTimeChange, onClose, team, quickTasks }) {
   const ref = useRef(null)
   const dayLabel   = DAYS.find((d) => d.id === modal.dayId)?.label
-  const startLabel = SLOTS[modal.startIdx]
-  const endLabel   = endTimeLabel(modal.endIdx)
+  const startLabel = modal.startTime || SLOTS[modal.startIdx]
+  const endLabel   = modal.endTime   || endTimeLabel(modal.endIdx)
   const spanCount  = modal.endIdx - modal.startIdx + 1
   const isNew      = !modal.editId
 
