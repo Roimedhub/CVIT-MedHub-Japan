@@ -24,7 +24,6 @@ const SLOT_H = 36
 
 function makeSlots() {
   const slots = []
-  // Start at 8:30, end at 18:00
   slots.push('08:30')
   for (let h = 9; h < 18; h++) {
     slots.push(`${String(h).padStart(2, '0')}:00`)
@@ -44,7 +43,17 @@ function load() {
   catch { return [] }
 }
 
-// Assigns column index and total overlapping columns to each assignment
+function durationLabel(spanCount) {
+  if (spanCount === 1) return '30 min'
+  return spanCount % 2 === 0 ? `${spanCount / 2}h` : `${Math.floor(spanCount / 2)}h 30m`
+}
+
+function endTimeLabel(slotIdx) {
+  const [h, m] = SLOTS[slotIdx].split(':').map(Number)
+  const total = h * 60 + m + 30
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}
+
 function layoutDayAssignments(dayAssignments) {
   if (!dayAssignments.length) return new Map()
   const sorted = [...dayAssignments].sort((a, b) => a.startIdx - b.startIdx)
@@ -70,32 +79,25 @@ function layoutDayAssignments(dayAssignments) {
   return result
 }
 
-function durationLabel(spanCount) {
-  if (spanCount === 1) return '30 min'
-  return spanCount % 2 === 0 ? `${spanCount / 2}h` : `${Math.floor(spanCount / 2)}h 30m`
-}
-
-function endTimeLabel(slotIdx) {
-  const [h, m] = SLOTS[slotIdx].split(':').map(Number)
-  const total = h * 60 + m + 30
-  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
-}
-
 // ── Schedule ─────────────────────────────────────────────────────────────────
 export default function Schedule() {
   const [assignments, setAssignments] = useState(load)
-  const [drag, setDrag]             = useState(null)
-  const [modal, setModal]           = useState(null)
+  const [drag, setDrag]               = useState(null)
+  const [modal, setModal]             = useState(null)
   const [editMembers, setEditMembers] = useState([])
-  const [editTask, setEditTask]     = useState('Booth')
+  const [editTask, setEditTask]       = useState('Booth')
   const [filterMember, setFilterMember] = useState(null)
+  const [moving, setMoving]           = useState(null) // block drag-to-move state
 
-  const dragRef = useRef(null)
+  const dragRef   = useRef(null)
+  const movingRef = useRef(null)
+  const dayColRefs = useRef({})
+
   useEffect(() => { dragRef.current = drag }, [drag])
-
+  useEffect(() => { movingRef.current = moving }, [moving])
   useEffect(() => { localStorage.setItem(LS_KEY, JSON.stringify(assignments)) }, [assignments])
 
-  // ── drag ──
+  // ── slot-selection drag (create new) ──
   const onCellDown = useCallback((dayId, idx, e) => {
     e.preventDefault()
     setDrag({ dayId, startIdx: idx, currentIdx: idx })
@@ -122,6 +124,87 @@ export default function Schedule() {
     window.addEventListener('mouseup', up)
     return () => window.removeEventListener('mouseup', up)
   }, [])
+
+  // ── block drag-to-move ──
+  const onBlockMouseDown = useCallback((a, e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    const blockRect = e.currentTarget.getBoundingClientRect()
+    const offsetIdx = Math.max(0, Math.floor((e.clientY - blockRect.top) / SLOT_H))
+    setMoving({
+      assignment: a,
+      offsetIdx,
+      startX: e.clientX,
+      startY: e.clientY,
+      moved: false,
+      targetDayId: a.dayId,
+      targetSlotIdx: a.startIdx,
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!moving) return
+
+    const findTarget = (mouseX, mouseY) => {
+      for (const [dayId, el] of Object.entries(dayColRefs.current)) {
+        if (!el) continue
+        const rect = el.getBoundingClientRect()
+        if (mouseX >= rect.left && mouseX <= rect.right) {
+          const relY = mouseY - rect.top
+          const span = moving.assignment.endIdx - moving.assignment.startIdx
+          const rawSlot = Math.floor(relY / SLOT_H) - moving.offsetIdx
+          const targetSlotIdx = Math.max(0, Math.min(SLOTS.length - 1 - span, rawSlot))
+          return { targetDayId: dayId, targetSlotIdx }
+        }
+      }
+      return { targetDayId: moving.targetDayId, targetSlotIdx: moving.targetSlotIdx }
+    }
+
+    const onMove = (e) => {
+      const m = movingRef.current
+      if (!m) return
+      const dx = e.clientX - m.startX
+      const dy = e.clientY - m.startY
+      const moved = m.moved || (Math.abs(dx) + Math.abs(dy) > 6)
+      const target = findTarget(e.clientX, e.clientY)
+      setMoving((prev) => ({ ...prev, moved, ...target }))
+    }
+
+    const onUp = (e) => {
+      const m = movingRef.current
+      if (!m) return
+      if (!m.moved) {
+        // treat as click → open edit modal
+        const el = dayColRefs.current[m.assignment.dayId]
+        const rect = el ? el.getBoundingClientRect() : { top: 0 }
+        setEditMembers(m.assignment.memberIds || (m.assignment.memberId ? [m.assignment.memberId] : []))
+        setEditTask(m.assignment.task)
+        setModal({
+          dayId: m.assignment.dayId,
+          startIdx: m.assignment.startIdx,
+          endIdx: m.assignment.endIdx,
+          editId: m.assignment.id,
+          anchorY: rect.top + m.assignment.startIdx * SLOT_H + window.scrollY,
+        })
+      } else {
+        // commit move
+        const span = m.assignment.endIdx - m.assignment.startIdx
+        setAssignments((prev) => prev.map((a) =>
+          a.id === m.assignment.id
+            ? { ...a, dayId: m.targetDayId, startIdx: m.targetSlotIdx, endIdx: m.targetSlotIdx + span }
+            : a
+        ))
+      }
+      setMoving(null)
+    }
+
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [moving])
 
   // ── edit existing block ──
   const openEdit = (a, anchorY) => {
@@ -168,7 +251,7 @@ export default function Schedule() {
   const dragHi = drag ? Math.max(drag.startIdx, drag.currentIdx) : -1
 
   return (
-    <div className="sched-page" onMouseLeave={() => setDrag(null)}>
+    <div className="sched-page" onMouseLeave={() => { setDrag(null) }} style={{ cursor: moving?.moved ? 'grabbing' : undefined }}>
       <div className="page-header">
         <h1 className="page-title">Conference Schedule</h1>
         <p className="page-desc">CVIT 2026 · MedHub Japan Team</p>
@@ -198,7 +281,6 @@ export default function Schedule() {
         )}
       </div>
 
-      {/* Single unified grid — header row + body rows share the same column tracks */}
       <div className="sched-wrapper">
         <div className="sched-grid-main" style={{ gridTemplateColumns: `var(--time-col-w) repeat(${DAYS.length}, 1fr)` }}>
 
@@ -211,7 +293,7 @@ export default function Schedule() {
             </div>
           ))}
 
-          {/* ── Time column (spans all body rows via CSS) ── */}
+          {/* ── Time column ── */}
           <div className="time-col">
             {SLOTS.map((slot, idx) => {
               const [h, m] = slot.split(':').map(Number)
@@ -234,10 +316,14 @@ export default function Schedule() {
               return ids.includes(filterMember)
             })
             const layout = layoutDayAssignments(dayAssignments)
+            const showPreview = moving?.moved && moving.targetDayId === day.id
+            const previewSpan = moving ? moving.assignment.endIdx - moving.assignment.startIdx : 0
+
             return (
               <div
                 key={day.id}
                 className={`day-col${drag?.dayId === day.id ? ' dragging' : ''}`}
+                ref={(el) => { dayColRefs.current[day.id] = el }}
                 onMouseUp={(e) => onMouseUp(day.id, e)}
               >
                 {SLOTS.map((slot, idx) => {
@@ -254,6 +340,16 @@ export default function Schedule() {
                   )
                 })}
 
+                {/* Ghost preview while moving */}
+                {showPreview && (
+                  <div className="assignment-block move-ghost" style={{
+                    top: `${moving.targetSlotIdx * SLOT_H}px`,
+                    height: `${(previewSpan + 1) * SLOT_H - 2}px`,
+                    left: 0,
+                    width: '100%',
+                  }} />
+                )}
+
                 {dayAssignments.map((a) => {
                   const memberIds = a.memberIds || (a.memberId ? [a.memberId] : [])
                   const members   = memberIds.map((id) => MEMBER_MAP[id]).filter(Boolean)
@@ -261,10 +357,11 @@ export default function Schedule() {
                   const { colIndex, totalCols } = layout.get(a.id) || { colIndex: 0, totalCols: 1 }
                   const widthPct = 100 / totalCols
                   const leftPct  = colIndex * widthPct
+                  const isMoving = moving?.assignment.id === a.id && moving.moved
                   return (
                     <div
                       key={a.id}
-                      className="assignment-block"
+                      className={`assignment-block${isMoving ? ' is-moving' : ''}`}
                       style={{
                         top: `${a.startIdx * SLOT_H}px`,
                         height: `${spanCount * SLOT_H - 2}px`,
@@ -275,12 +372,9 @@ export default function Schedule() {
                         borderTop: '1px solid #0a875440',
                         borderBottom: '1px solid #0a875440',
                         borderRight: '1px solid #0a875420',
+                        cursor: 'grab',
                       }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        const rect = e.currentTarget.closest('.day-col').getBoundingClientRect()
-                        openEdit(a, rect.top + a.startIdx * SLOT_H + window.scrollY)
-                      }}
+                      onMouseDown={(e) => onBlockMouseDown(a, e)}
                     >
                       <div className={`block-inner${spanCount === 1 ? ' compact' : ''}`}>
                         <div className="block-task">{a.task}</div>
@@ -325,7 +419,7 @@ export default function Schedule() {
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, onSave, onDelete, onParallel, onClose, team, quickTasks }) {
   const ref = useRef(null)
-  const dayLabel  = DAYS.find((d) => d.id === modal.dayId)?.label
+  const dayLabel   = DAYS.find((d) => d.id === modal.dayId)?.label
   const startLabel = SLOTS[modal.startIdx]
   const endLabel   = endTimeLabel(modal.endIdx)
   const spanCount  = modal.endIdx - modal.startIdx + 1

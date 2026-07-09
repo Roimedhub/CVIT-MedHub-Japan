@@ -187,6 +187,19 @@
 
 .assignment-block:hover { filter: brightness(0.93); }
 
+.assignment-block.is-moving {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.assignment-block.move-ghost {
+  background: #0a875430 !important;
+  border: 2px dashed #0a8754 !important;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 3;
+}
+
 .block-inner {
   padding: 4px 8px;
   height: 100%;
