@@ -433,6 +433,7 @@ export default function Schedule() {
           onSave={saveAssignment}
           onDelete={modal.editId ? deleteAssignment : null}
           onParallel={modal.editId ? openParallelTask : null}
+          onTimeChange={(startIdx, endIdx) => setModal((m) => ({ ...m, startIdx, endIdx }))}
           onClose={() => setModal(null)}
           team={TEAM}
           quickTasks={QUICK_TASKS}
@@ -443,12 +444,13 @@ export default function Schedule() {
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, onSave, onDelete, onParallel, onClose, team, quickTasks }) {
+function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, onSave, onDelete, onParallel, onTimeChange, onClose, team, quickTasks }) {
   const ref = useRef(null)
   const dayLabel   = DAYS.find((d) => d.id === modal.dayId)?.label
   const startLabel = SLOTS[modal.startIdx]
   const endLabel   = endTimeLabel(modal.endIdx)
   const spanCount  = modal.endIdx - modal.startIdx + 1
+  const isNew      = !modal.editId
 
   useEffect(() => {
     if (!ref.current) return
@@ -477,9 +479,32 @@ function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, 
     <div className="modal-layer">
       <div className="assign-modal" ref={ref}>
         <div className="modal-header">
-          <div>
-            <div className="modal-slot">{dayLabel} · {startLabel} – {endLabel}</div>
-            <div className="modal-duration">{durationLabel(spanCount)}</div>
+          <div style={{ flex: 1 }}>
+            <div className="modal-slot">{dayLabel}</div>
+            {isNew ? (
+              <div className="modal-time-pickers">
+                <select
+                  className="modal-time-select"
+                  value={modal.startIdx}
+                  onChange={(e) => onTimeChange(Number(e.target.value), modal.endIdx)}
+                >
+                  {SLOTS.map((s, i) => <option key={i} value={i}>{s}</option>)}
+                </select>
+                <span className="modal-time-sep">–</span>
+                <select
+                  className="modal-time-select"
+                  value={modal.endIdx}
+                  onChange={(e) => onTimeChange(modal.startIdx, Number(e.target.value))}
+                >
+                  {SLOTS.map((s, i) => i > modal.startIdx
+                    ? <option key={i} value={i}>{endTimeLabel(i)}</option>
+                    : null
+                  )}
+                </select>
+              </div>
+            ) : (
+              <div className="modal-slot-time">{startLabel} – {endLabel} · {durationLabel(spanCount)}</div>
+            )}
           </div>
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
