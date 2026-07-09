@@ -114,6 +114,8 @@ export default function Schedule() {
   const [modal, setModal]             = useState(null)
   const [editMembers, setEditMembers] = useState([])
   const [editTask, setEditTask]       = useState('Booth')
+  const [editSession, setEditSession] = useState('')
+  const [editLocation, setEditLocation] = useState('')
   const [filterMember, setFilterMember] = useState(null)
   const [filterTask, setFilterTask]     = useState(null)
 
@@ -147,6 +149,8 @@ export default function Schedule() {
     const rect = e.currentTarget.getBoundingClientRect()
     setEditMembers([])
     setEditTask('Booth')
+    setEditSession('')
+    setEditLocation('')
     setModal({ dayId, startIdx: lo, endIdx: hi, startTime: SLOTS[lo], endTime: endTimeLabel(hi), anchorY: rect.top + lo * SLOT_H + window.scrollY })
   }, [])
 
@@ -210,6 +214,8 @@ export default function Schedule() {
         const rect = el ? el.getBoundingClientRect() : { top: 0 }
         setEditMembers(m.assignment.memberIds || (m.assignment.memberId ? [m.assignment.memberId] : []))
         setEditTask(m.assignment.task)
+        setEditSession(m.assignment.session || '')
+        setEditLocation(m.assignment.location || '')
         setModal({
           dayId: m.assignment.dayId,
           startIdx: m.assignment.startIdx,
@@ -241,6 +247,8 @@ export default function Schedule() {
   const openEdit = (a, anchorY) => {
     setEditMembers(a.memberIds || (a.memberId ? [a.memberId] : []))
     setEditTask(a.task)
+    setEditSession(a.session || '')
+    setEditLocation(a.location || '')
     setModal({ dayId: a.dayId, startIdx: a.startIdx, endIdx: a.endIdx, editId: a.id, anchorY })
   }
 
@@ -256,6 +264,8 @@ export default function Schedule() {
       endTime: modal.endTime || null,
       memberIds: editMembers,
       task: editTask || 'Booth',
+      session: editTask === 'Roll-up' ? editSession : undefined,
+      location: editTask === 'Roll-up' ? editLocation : undefined,
     }
     setAssignments((prev) =>
       modal.editId ? prev.map((a) => a.id === modal.editId ? entry : a) : [...prev, entry]
@@ -271,6 +281,8 @@ export default function Schedule() {
   const openParallelTask = () => {
     setEditMembers([])
     setEditTask('Booth')
+    setEditSession('')
+    setEditLocation('')
     setModal((m) => ({
       ...m,
       editId: undefined,
@@ -445,6 +457,12 @@ export default function Schedule() {
                     >
                       <div className={`block-inner${spanCount === 1 ? ' compact' : ''}`}>
                         <div className="block-task">{a.task}</div>
+                        {a.task === 'Roll-up' && (a.session || a.location) && (
+                          <div className="block-rollup-meta">
+                            {a.session && <span className="block-rollup-line">{a.session}</span>}
+                            {a.location && <span className="block-rollup-line">{a.location}</span>}
+                          </div>
+                        )}
                         <div className="block-members">
                           {members.map((m) => (
                             <span key={m.id} className="block-member-chip" style={{ color: m.color, background: m.color + '18', borderColor: m.color + '44' }}>
@@ -471,6 +489,10 @@ export default function Schedule() {
           toggleMember={toggleMember}
           editTask={editTask}
           setEditTask={setEditTask}
+          editSession={editSession}
+          setEditSession={setEditSession}
+          editLocation={editLocation}
+          setEditLocation={setEditLocation}
           onSave={saveAssignment}
           onDelete={modal.editId ? deleteAssignment : null}
           onParallel={modal.editId ? openParallelTask : null}
@@ -491,7 +513,7 @@ export default function Schedule() {
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, onSave, onDelete, onParallel, onTimeChange, onClose, team, quickTasks }) {
+function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, editSession, setEditSession, editLocation, setEditLocation, onSave, onDelete, onParallel, onTimeChange, onClose, team, quickTasks }) {
   const ref = useRef(null)
   const dayLabel   = DAYS.find((d) => d.id === modal.dayId)?.label
   const startLabel = SLOTS[modal.startIdx]
@@ -603,6 +625,25 @@ function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, 
             onChange={(e) => setEditTask(e.target.value)}
           />
         </div>
+
+        {editTask === 'Roll-up' && (
+          <div className="modal-section">
+            <div className="modal-label">Roll-up Details</div>
+            <input
+              className="task-input"
+              placeholder="Session (e.g. Morning Session A)"
+              value={editSession}
+              onChange={(e) => setEditSession(e.target.value)}
+              style={{ marginBottom: 8 }}
+            />
+            <input
+              className="task-input"
+              placeholder="Location (e.g. Hall 3, Booth #12)"
+              value={editLocation}
+              onChange={(e) => setEditLocation(e.target.value)}
+            />
+          </div>
+        )}
 
         <div className="modal-actions">
           {onDelete && <button className="modal-btn delete" onClick={onDelete}>Remove</button>}

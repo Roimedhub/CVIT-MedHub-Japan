@@ -258,6 +258,22 @@
 
 .block-inner.compact .block-members { display: none; }
 
+.block-rollup-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 2px;
+}
+
+.block-rollup-line {
+  font-size: 10px;
+  color: #0a8754cc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+}
+
 .block-duration {
   font-size: 10.5px;
   color: #8a9ab5;
