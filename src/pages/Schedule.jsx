@@ -486,7 +486,11 @@ function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, 
                 <select
                   className="modal-time-select"
                   value={modal.startIdx}
-                  onChange={(e) => onTimeChange(Number(e.target.value), modal.endIdx)}
+                  onChange={(e) => {
+                    const newStart = Number(e.target.value)
+                    const newEnd = modal.endIdx > newStart ? modal.endIdx : newStart + 1
+                    onTimeChange(newStart, newEnd)
+                  }}
                 >
                   {SLOTS.map((s, i) => <option key={i} value={i}>{s}</option>)}
                 </select>
