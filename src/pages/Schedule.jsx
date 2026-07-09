@@ -89,7 +89,7 @@ export default function Schedule() {
   const [filterMember, setFilterMember] = useState(null)
   const [filterTask, setFilterTask]     = useState(null)
 
-  const TASK_FILTERS = ['Reception + Hands-on', 'Reception+Game']
+  const TASK_FILTERS = ['Reception + Hands-on', 'Reception+Game', 'Roll-up']
   const [moving, setMoving]           = useState(null) // block drag-to-move state
 
   const dragRef   = useRef(null)
