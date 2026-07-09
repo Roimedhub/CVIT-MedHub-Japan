@@ -54,6 +54,34 @@ function endTimeLabel(slotIdx) {
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
+const START_MINS = 8 * 60 + 30
+
+function timeStrToMins(t) {
+  if (!t) return START_MINS
+  const [h, m] = t.split(':').map(Number)
+  return h * 60 + m
+}
+
+function nearestSlotIdx(timeStr) {
+  const mins = timeStrToMins(timeStr)
+  let nearest = 0, minDiff = Infinity
+  SLOTS.forEach((s, i) => {
+    const diff = Math.abs(timeStrToMins(s) - mins)
+    if (diff < minDiff) { minDiff = diff; nearest = i }
+  })
+  return nearest
+}
+
+function endTimeToSlotIdx(endStr) {
+  const mins = timeStrToMins(endStr)
+  let nearest = 0, minDiff = Infinity
+  SLOTS.forEach((s, i) => {
+    const diff = Math.abs(timeStrToMins(s) + 30 - mins)
+    if (diff < minDiff) { minDiff = diff; nearest = i }
+  })
+  return nearest
+}
+
 function layoutDayAssignments(dayAssignments) {
   if (!dayAssignments.length) return new Map()
   const sorted = [...dayAssignments].sort((a, b) => a.startIdx - b.startIdx)
@@ -119,7 +147,7 @@ export default function Schedule() {
     const rect = e.currentTarget.getBoundingClientRect()
     setEditMembers([])
     setEditTask('Booth')
-    setModal({ dayId, startIdx: lo, endIdx: hi, anchorY: rect.top + lo * SLOT_H + window.scrollY })
+    setModal({ dayId, startIdx: lo, endIdx: hi, startTime: SLOTS[lo], endTime: endTimeLabel(hi), anchorY: rect.top + lo * SLOT_H + window.scrollY })
   }, [])
 
   useEffect(() => {
@@ -224,6 +252,8 @@ export default function Schedule() {
       dayId: modal.dayId,
       startIdx: modal.startIdx,
       endIdx: modal.endIdx,
+      startTime: modal.startTime || null,
+      endTime: modal.endTime || null,
       memberIds: editMembers,
       task: editTask || 'Booth',
     }
@@ -241,7 +271,12 @@ export default function Schedule() {
   const openParallelTask = () => {
     setEditMembers([])
     setEditTask('Booth')
-    setModal((m) => ({ ...m, editId: undefined }))
+    setModal((m) => ({
+      ...m,
+      editId: undefined,
+      startTime: m.startTime || SLOTS[m.startIdx],
+      endTime: m.endTime || endTimeLabel(m.endIdx),
+    }))
   }
 
   const toggleMember = (id) => {
@@ -384,13 +419,19 @@ export default function Schedule() {
                   const widthPct = 100 / totalCols
                   const leftPct  = colIndex * widthPct
                   const isMoving = moving?.assignment.id === a.id && moving.moved
+                  const blockTop = a.startTime
+                    ? (timeStrToMins(a.startTime) - START_MINS) / 30 * SLOT_H
+                    : a.startIdx * SLOT_H
+                  const blockH = (a.startTime && a.endTime)
+                    ? (timeStrToMins(a.endTime) - timeStrToMins(a.startTime)) / 30 * SLOT_H - 2
+                    : spanCount * SLOT_H - 2
                   return (
                     <div
                       key={a.id}
                       className={`assignment-block${isMoving ? ' is-moving' : ''}`}
                       style={{
-                        top: `${a.startIdx * SLOT_H}px`,
-                        height: `${spanCount * SLOT_H - 2}px`,
+                        top: `${blockTop}px`,
+                        height: `${blockH}px`,
                         left: `${leftPct}%`,
                         width: `${widthPct}%`,
                         background: '#0a875418',
@@ -433,7 +474,13 @@ export default function Schedule() {
           onSave={saveAssignment}
           onDelete={modal.editId ? deleteAssignment : null}
           onParallel={modal.editId ? openParallelTask : null}
-          onTimeChange={(startIdx, endIdx) => setModal((m) => ({ ...m, startIdx, endIdx }))}
+          onTimeChange={(startTime, endTime) => setModal((m) => ({
+            ...m,
+            startTime,
+            endTime,
+            startIdx: nearestSlotIdx(startTime),
+            endIdx: endTimeToSlotIdx(endTime),
+          }))}
           onClose={() => setModal(null)}
           team={TEAM}
           quickTasks={QUICK_TASKS}
@@ -483,23 +530,19 @@ function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, 
             <div className="modal-slot">{dayLabel}</div>
             {isNew ? (
               <div className="modal-time-pickers">
-                <select
-                  className="modal-time-select"
-                  value={modal.startIdx}
-                  onChange={(e) => onTimeChange(Number(e.target.value), modal.endIdx)}
-                >
-                  {SLOTS.map((s, i) => <option key={i} value={i}>{s}</option>)}
-                </select>
+                <input
+                  type="time"
+                  className="modal-time-input"
+                  value={modal.startTime || startLabel}
+                  onChange={(e) => onTimeChange(e.target.value, modal.endTime || endLabel)}
+                />
                 <span className="modal-time-sep">–</span>
-                <select
-                  className="modal-time-select"
-                  value={modal.endIdx}
-                  onChange={(e) => onTimeChange(modal.startIdx, Number(e.target.value))}
-                >
-                  {SLOTS.map((s, i) => (
-                    <option key={i} value={i}>{endTimeLabel(i)}</option>
-                  ))}
-                </select>
+                <input
+                  type="time"
+                  className="modal-time-input"
+                  value={modal.endTime || endLabel}
+                  onChange={(e) => onTimeChange(modal.startTime || startLabel, e.target.value)}
+                />
               </div>
             ) : (
               <div className="modal-slot-time">{startLabel} – {endLabel} · {durationLabel(spanCount)}</div>

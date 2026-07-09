@@ -340,6 +340,22 @@
   cursor: pointer;
 }
 
+.modal-time-input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface2);
+  width: 110px;
+  outline: none;
+}
+
+.modal-time-input:focus {
+  border-color: var(--primary);
+}
+
 .modal-time-sep { color: var(--text-muted); font-size: 13px; }
 .modal-duration { font-size: 11px; opacity: 0.65; margin-top: 2px; letter-spacing: 0.3px; }
 
