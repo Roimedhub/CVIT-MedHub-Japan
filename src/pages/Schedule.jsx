@@ -524,7 +524,6 @@ function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, 
   const startLabel = modal.startTime || SLOTS[modal.startIdx]
   const endLabel   = modal.endTime   || endTimeLabel(modal.endIdx)
   const spanCount  = modal.endIdx - modal.startIdx + 1
-  const isNew      = !modal.editId
 
   useEffect(() => {
     if (!ref.current) return
@@ -555,25 +554,21 @@ function AssignModal({ modal, editMembers, toggleMember, editTask, setEditTask, 
         <div className="modal-header">
           <div style={{ flex: 1 }}>
             <div className="modal-slot">{dayLabel}</div>
-            {isNew ? (
-              <div className="modal-time-pickers">
-                <input
-                  type="time"
-                  className="modal-time-input"
-                  value={modal.startTime || startLabel}
-                  onChange={(e) => onTimeChange(e.target.value, modal.endTime || endLabel)}
-                />
-                <span className="modal-time-sep">–</span>
-                <input
-                  type="time"
-                  className="modal-time-input"
-                  value={modal.endTime || endLabel}
-                  onChange={(e) => onTimeChange(modal.startTime || startLabel, e.target.value)}
-                />
-              </div>
-            ) : (
-              <div className="modal-slot-time">{startLabel} – {endLabel} · {durationLabel(spanCount)}</div>
-            )}
+            <div className="modal-time-pickers">
+              <input
+                type="time"
+                className="modal-time-input"
+                value={modal.startTime || startLabel}
+                onChange={(e) => onTimeChange(e.target.value, modal.endTime || endLabel)}
+              />
+              <span className="modal-time-sep">–</span>
+              <input
+                type="time"
+                className="modal-time-input"
+                value={modal.endTime || endLabel}
+                onChange={(e) => onTimeChange(modal.startTime || startLabel, e.target.value)}
+              />
+            </div>
           </div>
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
