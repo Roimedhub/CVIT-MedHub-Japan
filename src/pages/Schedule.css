@@ -295,8 +295,10 @@
   color: var(--text);
   line-height: 1.2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  word-break: normal;
   flex: 1;
   min-width: 0;
 }
@@ -307,7 +309,9 @@
   color: #0a875499;
   letter-spacing: 0.1px;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .block-inner.compact .block-members   { display: none; }
