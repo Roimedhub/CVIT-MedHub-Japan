@@ -118,6 +118,7 @@ export default function Schedule() {
   const [editLocation, setEditLocation] = useState('')
   const [filterMember, setFilterMember] = useState(null)
   const [filterTask, setFilterTask]     = useState(null)
+  const [filterDay, setFilterDay]       = useState(null)
 
   const TASK_FILTERS = ['Reception + Hands-on', 'Reception+Game', 'Roll-up']
   const [moving, setMoving]           = useState(null) // block drag-to-move state
@@ -353,12 +354,33 @@ export default function Schedule() {
         )}
       </div>
 
+      <div className="day-filter-bar">
+        <div
+          className={`day-filter-chip${!filterDay ? ' day-filter-active' : ''}`}
+          onClick={() => setFilterDay(null)}
+        >
+          All Days
+        </div>
+        {DAYS.map((d) => (
+          <div
+            key={d.id}
+            className={`day-filter-chip${filterDay === d.id ? ' day-filter-active' : ''}`}
+            onClick={() => setFilterDay(filterDay === d.id ? null : d.id)}
+          >
+            {d.label} <span className="day-filter-date">{d.date}</span>
+          </div>
+        ))}
+      </div>
+
       <div className="sched-wrapper">
-        <div className="sched-grid-main" style={{ gridTemplateColumns: `var(--time-col-w) repeat(${DAYS.length}, 1fr)` }}>
+        {(() => {
+          const visibleDays = filterDay ? DAYS.filter((d) => d.id === filterDay) : DAYS
+          return (
+        <div className="sched-grid-main" style={{ gridTemplateColumns: `var(--time-col-w) repeat(${visibleDays.length}, 1fr)` }}>
 
           {/* ── Header row ── */}
           <div className="sched-corner" />
-          {DAYS.map((d) => (
+          {visibleDays.map((d) => (
             <div key={d.id} className="sched-day-header">
               <span className="sched-day-label">{d.label}</span>
               <span className="sched-day-date">{d.date}</span>
@@ -380,7 +402,7 @@ export default function Schedule() {
           </div>
 
           {/* ── Day columns ── */}
-          {DAYS.map((day) => {
+          {visibleDays.map((day) => {
             const dayAssignments = assignments.filter((a) => {
               if (a.dayId !== day.id) return false
               if (filterMember) {
@@ -485,6 +507,8 @@ export default function Schedule() {
           })}
 
         </div>
+          )
+        })()}
       </div>
 
       {modal && (

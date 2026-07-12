@@ -77,6 +77,41 @@
   flex-shrink: 0;
 }
 
+/* ── Day filter bar ── */
+.day-filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.day-filter-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.day-filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+
+.day-filter-chip.day-filter-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.day-filter-date {
+  font-weight: 400;
+  opacity: 0.75;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
 /* ── Wrapper + unified grid ── */
 .sched-wrapper {
   background: var(--surface);
