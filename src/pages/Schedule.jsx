@@ -480,9 +480,11 @@ export default function Schedule() {
                       onMouseDown={(e) => onBlockMouseDown(a, e)}
                     >
                       <div className={`block-inner${spanCount === 1 ? ' compact' : ''}`}>
-                        <div className="block-task">{a.task}</div>
-                        <div className="block-time-label">
-                          {(a.startTime || SLOTS[a.startIdx])} – {(a.endTime || endTimeLabel(a.endIdx))}
+                        <div className="block-title-row">
+                          <div className="block-task">{a.task}</div>
+                          <div className="block-time-label">
+                            {(a.startTime || SLOTS[a.startIdx])} – {(a.endTime || endTimeLabel(a.endIdx))}
+                          </div>
                         </div>
                         {a.task === 'Roll-up' && (a.session || a.location) && (
                           <div className="block-rollup-meta">
