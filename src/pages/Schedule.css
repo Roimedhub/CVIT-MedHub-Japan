@@ -77,6 +77,21 @@
   flex-shrink: 0;
 }
 
+/* ── Backup button ── */
+.backup-btn {
+  padding: 6px 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.backup-btn:hover { border-color: var(--primary); color: var(--primary); }
+
 /* ── Migration banner ── */
 .migrate-banner {
   display: flex;
@@ -371,22 +386,22 @@
 
 /* ── Mobile ── */
 @media (max-width: 640px) {
-  .sched-wrapper { border-radius: 8px; }
+  .sched-wrapper { border-radius: 8px; --time-col-w: 72px; }
 
-  /* Shrink time column and slot height on mobile */
-  .sched-wrapper { --time-col-w: 84px; }
-
-  .time-cell { font-size: 9px; padding: 0 5px; }
-
-  .slot-cell { height: 32px; }
-  .time-cell { height: 32px; }
+  .time-cell { font-size: 9px; padding: 0 4px; height: 48px; }
+  .slot-cell { height: 48px; }
   .assignment-block { border-radius: 0 4px 4px 0; }
 
-  .block-member-chip { font-size: 10px; padding: 1px 4px; }
-  .block-task        { font-size: 10px; }
+  .block-inner { padding: 4px 6px; gap: 2px; }
+  .block-task  { font-size: 11px; -webkit-line-clamp: 3; }
+  .block-time-label  { font-size: 10px; }
+  .block-member-chip { font-size: 10px; padding: 1px 5px; }
+  .block-rollup-line { white-space: normal; font-size: 10px; }
 
   .team-legend { gap: 6px; }
   .team-chip   { font-size: 12px; padding: 4px 10px; }
+
+  .day-filter-chip { font-size: 12px; padding: 5px 10px; }
 
   /* Modal full-width on mobile */
   .assign-modal {

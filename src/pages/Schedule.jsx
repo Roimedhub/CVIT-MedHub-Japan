@@ -353,9 +353,18 @@ export default function Schedule() {
 
   return (
     <div className="sched-page" onMouseLeave={() => { setDrag(null) }} style={{ cursor: moving?.moved ? 'grabbing' : undefined }}>
-      <div className="page-header">
-        <h1 className="page-title">Conference Schedule</h1>
-        <p className="page-desc">CVIT 2026 · MedHub Japan Team{loading ? ' · Loading…' : ''}</p>
+      <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+        <div>
+          <h1 className="page-title">Conference Schedule</h1>
+          <p className="page-desc">CVIT 2026 · MedHub Japan Team{loading ? ' · Loading…' : ''}</p>
+        </div>
+        <button className="backup-btn" onClick={() => {
+          const blob = new Blob([JSON.stringify(assignments, null, 2)], { type: 'application/json' })
+          const a = document.createElement('a')
+          a.href = URL.createObjectURL(blob)
+          a.download = `cvit-schedule-backup-${new Date().toISOString().slice(0,10)}.json`
+          a.click()
+        }}>⬇ Backup</button>
       </div>
 
 
