@@ -165,16 +165,19 @@ export default function Schedule() {
 
   useEffect(() => { dragRef.current = drag }, [drag])
   useEffect(() => { movingRef.current = moving }, [moving])
-  useEffect(() => { localStorage.setItem(LS_KEY, JSON.stringify(assignments)) }, [assignments])
+  useEffect(() => {
+    if (assignments.length > 0) localStorage.setItem(LS_KEY, JSON.stringify(assignments))
+  }, [assignments])
 
   // ── Load from Supabase on mount ──
   useEffect(() => {
     supabase.from('schedule_assignments').select('*').then(({ data, error }) => {
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         const mapped = data.map(rowToAssignment)
         setAssignments(mapped)
         localStorage.setItem(LS_KEY, JSON.stringify(mapped))
       }
+      // If Supabase is empty, keep whatever is in localStorage
       setLoading(false)
     })
   }, [])
