@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import './Schedule.css'
+import { supabase } from '../lib/supabase'
 
 // ── Config ───────────────────────────────────────────────────────────────────
 const DAYS = [
@@ -38,9 +39,39 @@ const LS_KEY = 'cvit-schedule-v3'
 
 function uid() { return Math.random().toString(36).slice(2, 10) }
 
-function load() {
+function loadLocal() {
   try { return JSON.parse(localStorage.getItem(LS_KEY)) || [] }
   catch { return [] }
+}
+
+function rowToAssignment(r) {
+  return {
+    id: r.id,
+    dayId: r.day_id,
+    startIdx: r.start_idx,
+    endIdx: r.end_idx,
+    startTime: r.start_time || null,
+    endTime: r.end_time || null,
+    memberIds: r.member_ids || [],
+    task: r.task,
+    session: r.session || undefined,
+    location: r.location || undefined,
+  }
+}
+
+function assignmentToRow(a) {
+  return {
+    id: a.id,
+    day_id: a.dayId,
+    start_idx: a.startIdx,
+    end_idx: a.endIdx,
+    start_time: a.startTime || null,
+    end_time: a.endTime || null,
+    member_ids: a.memberIds || [],
+    task: a.task,
+    session: a.session || null,
+    location: a.location || null,
+  }
 }
 
 function durationLabel(spanCount) {
@@ -109,7 +140,8 @@ function layoutDayAssignments(dayAssignments) {
 
 // ── Schedule ─────────────────────────────────────────────────────────────────
 export default function Schedule() {
-  const [assignments, setAssignments] = useState(load)
+  const [assignments, setAssignments] = useState(loadLocal)
+  const [loading, setLoading] = useState(true)
   const [drag, setDrag]               = useState(null)
   const [modal, setModal]             = useState(null)
   const [editMembers, setEditMembers] = useState([])
@@ -130,6 +162,18 @@ export default function Schedule() {
   useEffect(() => { dragRef.current = drag }, [drag])
   useEffect(() => { movingRef.current = moving }, [moving])
   useEffect(() => { localStorage.setItem(LS_KEY, JSON.stringify(assignments)) }, [assignments])
+
+  // ── Load from Supabase on mount ──
+  useEffect(() => {
+    supabase.from('schedule_assignments').select('*').then(({ data, error }) => {
+      if (!error && data) {
+        const mapped = data.map(rowToAssignment)
+        setAssignments(mapped)
+        localStorage.setItem(LS_KEY, JSON.stringify(mapped))
+      }
+      setLoading(false)
+    })
+  }, [])
 
   // ── slot-selection drag (create new) ──
   const onCellDown = useCallback((dayId, idx, e) => {
@@ -229,11 +273,9 @@ export default function Schedule() {
       } else {
         // commit move
         const span = m.assignment.endIdx - m.assignment.startIdx
-        setAssignments((prev) => prev.map((a) =>
-          a.id === m.assignment.id
-            ? { ...a, dayId: m.targetDayId, startIdx: m.targetSlotIdx, endIdx: m.targetSlotIdx + span }
-            : a
-        ))
+        const moved = { ...m.assignment, dayId: m.targetDayId, startIdx: m.targetSlotIdx, endIdx: m.targetSlotIdx + span }
+        setAssignments((prev) => prev.map((a) => a.id === m.assignment.id ? moved : a))
+        supabase.from('schedule_assignments').upsert(assignmentToRow(moved))
       }
       setMoving(null)
     }
@@ -256,7 +298,7 @@ export default function Schedule() {
   }
 
   // ── save / delete ──
-  const saveAssignment = () => {
+  const saveAssignment = async () => {
     if (!editMembers.length || !modal) return
     const entry = {
       id: modal.editId || uid(),
@@ -274,11 +316,14 @@ export default function Schedule() {
       modal.editId ? prev.map((a) => a.id === modal.editId ? entry : a) : [...prev, entry]
     )
     setModal(null)
+    await supabase.from('schedule_assignments').upsert(assignmentToRow(entry))
   }
 
-  const deleteAssignment = () => {
-    setAssignments((prev) => prev.filter((a) => a.id !== modal.editId))
+  const deleteAssignment = async () => {
+    const id = modal.editId
+    setAssignments((prev) => prev.filter((a) => a.id !== id))
     setModal(null)
+    await supabase.from('schedule_assignments').delete().eq('id', id)
   }
 
   const openParallelTask = () => {
@@ -307,7 +352,7 @@ export default function Schedule() {
     <div className="sched-page" onMouseLeave={() => { setDrag(null) }} style={{ cursor: moving?.moved ? 'grabbing' : undefined }}>
       <div className="page-header">
         <h1 className="page-title">Conference Schedule</h1>
-        <p className="page-desc">CVIT 2026 · MedHub Japan Team</p>
+        <p className="page-desc">CVIT 2026 · MedHub Japan Team{loading ? ' · Loading…' : ''}</p>
       </div>
 
       <div className="team-legend">
