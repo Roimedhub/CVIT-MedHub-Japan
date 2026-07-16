@@ -142,6 +142,10 @@ function layoutDayAssignments(dayAssignments) {
 export default function Schedule() {
   const [assignments, setAssignments] = useState(loadLocal)
   const [loading, setLoading] = useState(true)
+  const [migrating, setMigrating] = useState(false)
+  const [migrated, setMigrated] = useState(false)
+  const localData = loadLocal()
+  const hasMigratable = localData.length > 0
   const [drag, setDrag]               = useState(null)
   const [modal, setModal]             = useState(null)
   const [editMembers, setEditMembers] = useState([])
@@ -339,6 +343,21 @@ export default function Schedule() {
     }))
   }
 
+  const migrateToCloud = async () => {
+    const local = loadLocal()
+    if (!local.length) return
+    setMigrating(true)
+    const rows = local.map(assignmentToRow)
+    const { error } = await supabase.from('schedule_assignments').upsert(rows)
+    setMigrating(false)
+    if (!error) {
+      setMigrated(true)
+      setAssignments(local)
+    } else {
+      alert('Migration failed: ' + error.message)
+    }
+  }
+
   const toggleMember = (id) => {
     setEditMembers((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -354,6 +373,20 @@ export default function Schedule() {
         <h1 className="page-title">Conference Schedule</h1>
         <p className="page-desc">CVIT 2026 · MedHub Japan Team{loading ? ' · Loading…' : ''}</p>
       </div>
+
+      {!loading && hasMigratable && !migrated && (
+        <div className="migrate-banner">
+          <span>You have local schedule data on this device that others can't see.</span>
+          <button className="migrate-btn" onClick={migrateToCloud} disabled={migrating}>
+            {migrating ? 'Uploading…' : '☁ Upload to cloud'}
+          </button>
+        </div>
+      )}
+      {migrated && (
+        <div className="migrate-banner migrate-success">
+          ✅ Schedule uploaded — everyone can now see it.
+        </div>
+      )}
 
       <div className="team-legend">
         {TEAM.map((m) => {

@@ -77,6 +77,42 @@
   flex-shrink: 0;
 }
 
+/* ── Migration banner ── */
+.migrate-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400e;
+  flex-wrap: wrap;
+}
+
+.migrate-banner.migrate-success {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+
+.migrate-btn {
+  padding: 6px 16px;
+  background: #003087;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.migrate-btn:hover    { background: #002070; }
+.migrate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
 /* ── Day filter bar ── */
 .day-filter-bar {
   display: flex;
